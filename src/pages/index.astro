@@ -133,17 +133,25 @@ import '../styles/global.css';
 				shortenedUrlInput.value = `${API_URL}/${shortCode}}`;
 			}
 
+			form.reset();
 
 
+		}catch (err){
+			console.error(err);
+			alert('Failed to connect to Server.')
+		}
+	});
 
+	copyBtn?.addEventListener('click', () => {
+		if(shortenedUrlInput?.value){
+			navigator.clipboard.writeText(shortenedUrlInput.value);
 
-
-		}catch{}
-	})
-
-
-
-
-
+			const originalText = copyBtn.innerText;
+			copyBtn.innerText = 'Copied';
+			setTimeout(() => {
+				copyBtn.innerText = originalText;
+			}, 2000);
+		}
+	});
 
 </script>
