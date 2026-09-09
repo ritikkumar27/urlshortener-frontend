@@ -84,3 +84,66 @@ import '../styles/global.css';
     </main>
   </body>
 </html>
+
+<script>
+
+	const form = document.getElementById('shorten-form') as HTMLFormElement;
+	const resultContainer = document.getElementById('result-container');
+	const shortenedUrlInput = document.getElementById('shortened-url') as HTMLInputElement;
+	const copyBtn = document.getElementById('copy-btn');
+
+	const API_URL = import.meta.env.PUBLIC_API_URL;
+
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+
+		const formData = new FormData(form);
+		const originalUrl = formData.get('originalUrl');
+    	const customCode = formData.get('customCode');
+
+		try{
+
+			const response = await fetch(`${API_URL}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					originalUrl,
+					...(customCode ? {customCode} : {})
+				}),
+			});
+
+
+			if(!response.ok){
+				const errorData = await response.json();
+				alert(`Error: ${errorData.message || 'Something went wrong'}`);
+				return;
+			}
+
+
+			//success
+			const data = await response.json();
+
+			resultContainer?.classList.remove('hidden');
+			resultContainer?.classList.add('flex');
+
+			const shortCode = data.customCode || data.id;
+			if(shortenedUrlInput){
+				shortenedUrlInput.value = `${API_URL}/${shortCode}}`;
+			}
+
+
+
+
+
+
+		}catch{}
+	})
+
+
+
+
+
+
+</script>
