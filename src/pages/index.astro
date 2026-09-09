@@ -1,18 +1,86 @@
 ---
-import '../styles/global.css'; 
-
+import '../styles/global.css';
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>URL Shortener</title>
+  </head>
+  <body>
+    <!-- bg-base-200 gives us a nice subtle background color -->
+    <main class="min-h-screen bg-base-200 flex items-center justify-center p-4">
+      
+      <!-- DaisyUI Card Component -->
+      <div class="card w-full max-w-lg bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-3xl font-bold text-primary justify-center mb-2">
+            URL Shortener
+          </h2>
+          <p class="text-center text-base-content/70 mb-6">
+            Paste your long URL below to shorten it.
+          </p>
+
+          <form id="shorten-form" class="flex flex-col gap-4">
+            
+            <!-- DaisyUI Form Control -->
+            <label class="form-control w-full">
+              <div class="label">
+                <span class="label-text font-medium">Long URL</span>
+              </div>
+              <input 
+                type="url" 
+                id="originalUrl"
+                name="originalUrl"
+                placeholder="https://example.com/very/long/link" 
+                class="input input-bordered w-full" 
+                required 
+              />
+            </label>
+
+            <label class="form-control w-full">
+              <div class="label">
+                <span class="label-text font-medium">Custom Code (Optional)</span>
+              </div>
+              <input 
+                type="text" 
+                id="customCode"
+                name="customCode"
+                placeholder="e.g. my-link" 
+                class="input input-bordered w-full" 
+              />
+            </label>
+
+            <div class="card-actions mt-4">
+              <button type="submit" class="btn btn-primary w-full">
+                Shorten URL
+              </button>
+            </div>
+          </form>
+
+          <!-- Result Container (Hidden by default) -->
+          <div id="result-container" class="hidden mt-6 flex-col gap-4">
+            <div class="alert alert-success">
+              <span>Short link generated successfully!</span>
+            </div>
+            
+            <!-- DaisyUI Join (groups elements together nicely) -->
+            <div class="join w-full">
+              <input 
+                type="text" 
+                id="shortened-url" 
+                class="input input-bordered join-item w-full" 
+                readonly 
+              />
+              <button id="copy-btn" class="btn btn-secondary join-item">
+                Copy
+              </button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </main>
+  </body>
 </html>
