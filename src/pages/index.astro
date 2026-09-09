@@ -103,7 +103,7 @@ import '../styles/global.css';
 
 		try{
 
-			const response = await fetch(`${API_URL}`, {
+			const response = await fetch(`${API_URL}/links`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -128,9 +128,9 @@ import '../styles/global.css';
 			resultContainer?.classList.remove('hidden');
 			resultContainer?.classList.add('flex');
 
-			const shortCode = data.customCode || data.id;
+			const shortCode = data.shortCode;
 			if(shortenedUrlInput){
-				shortenedUrlInput.value = `${API_URL}/${shortCode}}`;
+				shortenedUrlInput.value = `${API_URL}/${shortCode}`;
 			}
 
 			form.reset();
