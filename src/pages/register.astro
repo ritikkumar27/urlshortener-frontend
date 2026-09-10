@@ -99,7 +99,50 @@ import '../styles/global.css';
     const form = document.getElementById('register-form') as HTMLFormElement;
     const API_URL = import.meta.env.PUBLIC_API_URL;
 
-
+    form?.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+        const name = formData.get('name') as string;
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                email,
+                password,
+                // Only send the name if the user actually typed one
+                ...(name ? { name } : {}) 
+                }),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                // Handle NestJS error format (sometimes an array of Zod validation messages)
+                const errorMessage = Array.isArray(errorData.message) 
+                    ? errorData.message[0] 
+                    : errorData.message;
+                showToast(errorMessage || 'Registration failed', 'error');
+                return;
+            }
+            // Success! Backend returns { user, accessToken, refreshToken }
+            const data = await response.json();
+            
+            // Save tokens securely in localStorage
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            showToast('Account created successfully! Redirecting...', 'success');
+            form.reset();
+            
+            // Redirect to the dashboard (we will build this later!)
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1500);
+        } catch (err) {
+            console.error(err);
+            showToast('Failed to connect to Server.', 'error');
+        }
+    });
 
 
 
