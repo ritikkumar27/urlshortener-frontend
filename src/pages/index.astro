@@ -90,10 +90,15 @@ import '../styles/global.css';
 
 <script>
 
+  type ToastType = 'success' | 'error' | 'info' | 'warning';
+
+
 	const form = document.getElementById('shorten-form') as HTMLFormElement;
 	const resultContainer = document.getElementById('result-container');
 	const shortenedUrlInput = document.getElementById('shortened-url') as HTMLInputElement;
 	const copyBtn = document.getElementById('copy-btn');
+  const toastContainer = document.getElementById('toast-container') as HTMLDivElement;
+
 
 	const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -120,7 +125,8 @@ import '../styles/global.css';
 
 			if(!response.ok){
 				const errorData = await response.json();
-				alert(`Error: ${errorData.message || 'Something went wrong'}`);
+				// alert(`Error: ${errorData.message || 'Something went wrong'}`);
+        showToast(errorData.message || 'Something went wrng', 'error');
 				return;
 			}
 
@@ -141,13 +147,15 @@ import '../styles/global.css';
 
 		}catch (err){
 			console.error(err);
-			alert('Failed to connect to Server.')
+			showToast('Failed to connect to Server.', 'error')
 		}
 	});
 
 	copyBtn?.addEventListener('click', () => {
 		if(shortenedUrlInput?.value){
 			navigator.clipboard.writeText(shortenedUrlInput.value);
+
+      showToast('Link copied to clipboard!', 'success');
 
 			const originalText = copyBtn.innerText;
 			copyBtn.innerText = 'Copied';
@@ -156,5 +164,25 @@ import '../styles/global.css';
 			}, 2000);
 		}
 	});
+
+
+  function showToast(message: string, type: ToastType = 'info'): void {
+
+    if(!toastContainer) return;
+
+    const alertDiv = document.createElement('div');
+
+    alertDiv.className = `alert alert-${type} shadow-lg transition-opacity duration-300`;
+
+    alertDiv.innerHTML = `<span>${message}</span>`;
+
+    toastContainer.appendChild(alertDiv);
+
+
+    setTimeout(() => {
+      alertDiv.style.opacity = '0';
+      setTimeout(() => alertDiv.remove(), 300); // Wait for fade transition to finish
+    }, 3000);
+  }
 
 </script>
