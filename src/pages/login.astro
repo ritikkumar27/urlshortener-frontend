@@ -64,3 +64,61 @@ import '../styles/global.css';
     </main>
   </body>
 </html>
+
+<script>
+  // 1. Setup Typed Toasts
+  type ToastType = 'success' | 'error' | 'info' | 'warning';
+  const toastContainer = document.getElementById('toast-container') as HTMLDivElement;
+  function showToast(message: string, type: ToastType = 'info'): void {
+    if (!toastContainer) return;
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} shadow-lg transition-opacity duration-300`;
+    alertDiv.innerHTML = `<span>${message}</span>`;
+    toastContainer.appendChild(alertDiv);
+    setTimeout(() => {
+      alertDiv.style.opacity = '0';
+      setTimeout(() => alertDiv.remove(), 300);
+    }, 3000);
+  }
+  // 2. Handle Form Submission
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const API_URL = import.meta.env.PUBLIC_API_URL;
+  form?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        // Handle NestJS error format
+        const errorMessage = Array.isArray(errorData.message) 
+            ? errorData.message[0] 
+            : errorData.message;
+        showToast(errorMessage || 'Login failed. Check your credentials.', 'error');
+        return;
+      }
+      // Success! Backend returns { user, accessToken, refreshToken }
+      const data = await response.json();
+      
+      // Save tokens securely in localStorage
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      showToast('Logged in successfully! Redirecting...', 'success');
+      form.reset();
+      
+      // Redirect to the dashboard
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to connect to Server.', 'error');
+    }
+  });
+</script>
