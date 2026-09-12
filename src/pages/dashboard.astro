@@ -70,3 +70,146 @@ import '../styles/global.css';
     </main>
   </body>
 </html>
+
+
+
+<script>
+  // 1. Setup Typed Toasts
+  type ToastType = 'success' | 'error' | 'info' | 'warning';
+  const toastContainer = document.getElementById('toast-container') as HTMLDivElement;
+
+  function showToast(message: string, type: ToastType = 'info'): void {
+    if (!toastContainer) return;
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} shadow-lg transition-opacity duration-300`;
+    alertDiv.innerHTML = `<span>${message}</span>`;
+    toastContainer.appendChild(alertDiv);
+    setTimeout(() => {
+      alertDiv.style.opacity = '0';
+      setTimeout(() => alertDiv.remove(), 300);
+    }, 3000);
+  }
+
+  // 2. Auth Guard & Variables
+  const API_URL = import.meta.env.PUBLIC_API_URL;
+  const token = localStorage.getItem('accessToken');
+
+  // DOM Elements
+  const loadingState = document.getElementById('loading-state') as HTMLDivElement;
+  const tableContainer = document.getElementById('table-container') as HTMLDivElement;
+  const emptyState = document.getElementById('empty-state') as HTMLDivElement;
+  const tableBody = document.getElementById('links-table-body') as HTMLTableSectionElement;
+  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
+
+  // Define the expected shape of our Link data from NestJS
+  interface Link {
+    id: string;
+    shortCode: string;
+    originalUrl: string;
+    isActive: boolean;
+    createdAt: string;
+  }
+
+  // 3. Kickoff Logic
+  if (!token) {
+    // If there is no token in localStorage, kick them out to the login page immediately
+    window.location.href = '/login';
+  } else {
+    // If they have a token, fetch their links
+    fetchUserLinks();
+  }
+
+  // 4. Fetch Links from Backend
+  async function fetchUserLinks(): Promise<void> {
+    try {
+      const response = await fetch(`${API_URL}/links`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Pass the JWT token exactly as NestJS expects it
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token is invalid or expired
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error('Failed to fetch links');
+      }
+
+      const links: Link[] = await response.json();
+      renderLinks(links);
+    } catch (err) {
+      console.error(err);
+      showToast('Could not load your links. Please try again.', 'error');
+      loadingState.classList.add('hidden');
+    }
+  }
+
+  // 5. Render Data to the HTML Table
+  function renderLinks(links: Link[]): void {
+    loadingState.classList.add('hidden'); // Hide the spinner
+
+    if (links.length === 0) {
+      emptyState.classList.remove('hidden'); // Show empty state message
+      return;
+    }
+
+    tableContainer.classList.remove('hidden'); // Show the table
+
+    links.forEach(link => {
+      const row = document.createElement('tr');
+      const shortUrl = `${API_URL}/${link.shortCode}`;
+      
+      row.innerHTML = `
+        <td>
+          <a href="${shortUrl}" target="_blank" class="link link-primary font-medium text-lg">
+            /${link.shortCode}
+          </a>
+        </td>
+        <td class="max-w-[200px] sm:max-w-xs truncate text-base-content/80" title="${link.originalUrl}">
+          ${link.originalUrl}
+        </td>
+        <td>
+          <div class="badge ${link.isActive ? 'badge-success' : 'badge-error'} badge-sm text-white">
+            ${link.isActive ? 'Active' : 'Inactive'}
+          </div>
+        </td>
+        <td class="text-sm text-base-content/70">
+          ${new Date(link.createdAt).toLocaleDateString()}
+        </td>
+        <td>
+          <button class="btn btn-sm btn-secondary copy-btn" data-url="${shortUrl}">
+            Copy
+          </button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    // Attach event listeners to all newly created copy buttons
+    const copyButtons = document.querySelectorAll('.copy-btn');
+    copyButtons.forEach(btn => {
+      btn.addEventListener('click', (e: Event) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const url = target.getAttribute('data-url');
+        if (url) {
+          navigator.clipboard.writeText(url);
+          showToast('Short link copied!', 'success');
+        }
+      });
+    });
+  }
+
+  // 6. Handle Logout
+  logoutBtn?.addEventListener('click', () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    window.location.href = '/login';
+  });
+</script>
