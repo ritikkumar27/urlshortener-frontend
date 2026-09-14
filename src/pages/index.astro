@@ -157,15 +157,21 @@ import '../styles/global.css';
 
 		const formData = new FormData(form);
 		const originalUrl = formData.get('originalUrl');
-    	const customCode = formData.get('customCode');
+    const customCode = formData.get('customCode');
 
 		try{
 
+      const requestHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if(token) {
+        requestHeaders['Authorization'] = `Bearer ${token}`;
+      }
+
 			const response = await fetch(`${API_URL}/links`, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: requestHeaders,
 				body: JSON.stringify({
 					originalUrl,
 					...(customCode ? {customCode} : {})
