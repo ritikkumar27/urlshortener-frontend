@@ -114,6 +114,9 @@ import '../styles/global.css';
 
 <script>
 
+  //token check
+  const token = localStorage.getItem('accessToken');
+
   type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 
@@ -122,6 +125,29 @@ import '../styles/global.css';
 	const shortenedUrlInput = document.getElementById('shortened-url') as HTMLInputElement;
 	const copyBtn = document.getElementById('copy-btn');
   const toastContainer = document.getElementById('toast-container') as HTMLDivElement;
+
+  //navbar elements
+  const navLoggedOut = document.getElementById('nav-logged-out') as HTMLDivElement;
+  const navLoggedIn = document.getElementById('nav-logged-in') as HTMLDivElement;
+  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
+
+  //navbar visiblity toggle
+  if(token) {
+    navLoggedIn?.classList.remove('hidden');
+    navLoggedIn?.classList.add('flex');
+  }else {
+    navLoggedOut?.classList.remove('hidden');
+    navLoggedOut?.classList.add('flex');
+  }
+
+
+  //logout from homepage
+  logoutBtn?.addEventListener('click', () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    //refresh
+    window.location.reload();
+  })
 
 
 	const API_URL = import.meta.env.PUBLIC_API_URL;
@@ -208,5 +234,7 @@ import '../styles/global.css';
       setTimeout(() => alertDiv.remove(), 300); // Wait for fade transition to finish
     }, 3000);
   }
+
+
 
 </script>
