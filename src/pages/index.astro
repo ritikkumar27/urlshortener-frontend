@@ -9,6 +9,30 @@ import '../styles/global.css';
     <title>URL Shortener</title>
   </head>
   <body>
+
+    <!-- Top Navigation Bar -->
+  <div class="navbar bg-base-100 shadow-sm border-b border-base-200 px-4">
+    <div class="flex-1">
+      <a href="/" class="btn btn-ghost text-xl text-primary font-bold">URL Shortener</a>
+    </div>
+    
+    <!-- State 1: Logged OUT (Hidden by default) -->
+    <div id="nav-logged-out" class="flex-none gap-2 hidden">
+      <a href="/login" class="btn btn-ghost">Log In</a>
+      <a href="/register" class="btn btn-primary">Register</a>
+    </div>
+
+    <!-- State 2: Logged IN (Hidden by default) -->
+    <div id="nav-logged-in" class="flex-none gap-2 hidden">
+      <a href="/dashboard" class="btn btn-ghost">Dashboard</a>
+      <button id="logout-btn" class="btn btn-outline btn-error btn-sm">Logout</button>
+    </div>
+  </div>
+
+
+
+
+
     <!-- bg-base-200 gives us a nice subtle background color -->
     <main class="min-h-screen bg-base-200 flex items-center justify-center p-4">
 
