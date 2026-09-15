@@ -316,7 +316,28 @@ import '../styles/global.css';
 
   //handle delete confirmation (delete request)
 
-  
+  confirmDeleteBtn?.addEventListener('click', async () => {
+    if (!currentActionId) return;
+    try {
+      const response = await fetch(`${API_URL}/links/${currentActionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to delete link');
+      showToast('Link deleted successfully!', 'success');
+      deleteModal.close();
+      
+      // Refresh the table data
+      tableBody.innerHTML = '';
+      loadingState.classList.remove('hidden');
+      fetchUserLinks();
+    } catch (err) {
+      console.error(err);
+      showToast('Error deleting link', 'error');
+    }
+  });
 
   
 </script>
