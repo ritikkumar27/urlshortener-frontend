@@ -253,6 +253,39 @@ import '../styles/global.css';
     window.location.href = '/login';
   });
 
+  // -- Edit and Delete Logic --
+
+  let currentActionId: string | null = null;
+  const editModal = document.getElementById('edit-modal') as HTMLDialogElement;
+  const deleteModal = document.getElementById('delete-modal') as HTMLDialogElement;
+  const editForm = document.getElementById('edit-form') as HTMLFormElement;
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn') as HTMLButtonElement;
+
+  // event delegation on tble body to handle dynamic buttorn
+
+  tableBody.addEventListener('click', (e: Event) => {
+    const target = e.target as HTMLElement;
+
+    if(target.classList.contains('edit-btn')) {
+
+      currentActionId = target.getAttribute('data-id');
+      const originalUrl = target.getAttribute('data-url') || '';
+      const isActive = target.getAttribute('data-active') === 'true';
+
+      (document.getElementById('edit-link-id') as HTMLInputElement).value = currentActionId || '';
+      (document.getElementById('edit-original-url') as HTMLInputElement).value = originalUrl;
+      (document.getElementById('edit-is-active') as HTMLInputElement).checked = isActive;
+
+      editModal.showModal();
+    }
+
+    if(target.classList.contains('delete-btn')) {
+      currentActionId = target.getAttribute('data-id');
+      deleteModal.showModal();
+    }
+  });
+
+  // handle edit form submissions (patch request)
 
   
 </script>
