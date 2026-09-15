@@ -286,6 +286,33 @@ import '../styles/global.css';
   });
 
   // handle edit form submissions (patch request)
+  editForm?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    if (!currentActionId) return;
+    const originalUrl = (document.getElementById('edit-original-url') as HTMLInputElement).value;
+    const isActive = (document.getElementById('edit-is-active') as HTMLInputElement).checked;
+    try {
+      const response = await fetch(`${API_URL}/links/${currentActionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ originalUrl, isActive })
+      });
+      if (!response.ok) throw new Error('Failed to update link');
+      showToast('Link updated successfully!', 'success');
+      editModal.close();
+      
+      // Refresh the table data
+      tableBody.innerHTML = '';
+      loadingState.classList.remove('hidden');
+      fetchUserLinks();
+    } catch (err) {
+      console.error(err);
+      showToast('Error updating link', 'error');
+    }
+  });
 
   
 </script>
