@@ -73,19 +73,30 @@ import '../styles/global.css';
         <div class="modal-box">
           <h3 class="font-bold text-lg mb-4">Edit Link</h3>
           <form id="edit-form" class="flex flex-col gap-4">
-            <!-- Hidden input to store the ID of the link we are editing -->
             <input type="hidden" id="edit-link-id" />
             
             <label class="form-control w-full">
-              <div class="label"><span class="label-text">Original URL</span></div>
-              <input type="url" id="edit-original-url" class="input input-bordered w-full" required />
+              <div class="label"><span class="label-text">Title</span></div>
+              <input type="text" id="edit-title" class="input input-bordered w-full" placeholder="e.g. My Campaign" />
             </label>
+
+            <label class="form-control w-full">
+              <div class="label"><span class="label-text">Description</span></div>
+              <textarea id="edit-description" class="textarea textarea-bordered w-full" placeholder="Optional notes..."></textarea>
+            </label>
+
+            <label class="form-control w-full">
+              <div class="label"><span class="label-text">Expiration Date</span></div>
+              <input type="datetime-local" id="edit-expires" class="input input-bordered w-full" />
+            </label>
+
             <label class="label cursor-pointer justify-start gap-4 mt-2">
               <span class="label-text">Active Status</span>
               <input type="checkbox" id="edit-is-active" class="toggle toggle-success" />
             </label>
+
             <div class="modal-action">
-              <button type="button" class="btn" onclick="(document.getElementById('edit-modal')).close()">Cancel</button>
+              <button type="button" class="btn" onclick="document.getElementById('edit-modal').close()">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
           </form>
@@ -139,13 +150,15 @@ import '../styles/global.css';
   const tableBody = document.getElementById('links-table-body') as HTMLTableSectionElement;
   const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
 
-  // Define the expected shape of our Link data from NestJS
   interface Link {
     id: string;
     shortCode: string;
     originalUrl: string;
     isActive: boolean;
     createdAt: string;
+    title?: string;
+    description?: string;
+    expiresAt?: string;
   }
 
   // 3. Kickoff Logic
@@ -224,7 +237,7 @@ import '../styles/global.css';
         <td>
           <div class="flex gap-2">
             <button class="btn btn-sm btn-secondary copy-btn" data-url="${shortUrl}">Copy</button>
-            <button class="btn btn-sm btn-info edit-btn" data-id="${link.id}" data-url="${link.originalUrl}" data-active="${link.isActive}">Edit</button>
+            <button class="btn btn-sm btn-info edit-btn" data-id="${link.id}" data-title="${link.title || ''}" data-description="${link.description || ''}" data-expires="${link.expiresAt || ''}" data-active="${link.isActive}">Edit</button>
             <button class="btn btn-sm btn-error delete-btn" data-id="${link.id}">Delete</button>
           </div>
         </td>
@@ -269,11 +282,22 @@ import '../styles/global.css';
     if(target.classList.contains('edit-btn')) {
 
       currentActionId = target.getAttribute('data-id');
-      const originalUrl = target.getAttribute('data-url') || '';
+      const title = target.getAttribute('data-title') || '';
+      const description = target.getAttribute('data-description') || '';
       const isActive = target.getAttribute('data-active') === 'true';
+      const expires = target.getAttribute('data-expires');
+      
+      let formattedDate = '';
+      if (expires && expires !== 'null') {
+        const d = new Date(expires);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        formattedDate = d.toISOString().slice(0, 16);
+      }
 
       (document.getElementById('edit-link-id') as HTMLInputElement).value = currentActionId || '';
-      (document.getElementById('edit-original-url') as HTMLInputElement).value = originalUrl;
+      (document.getElementById('edit-title') as HTMLInputElement).value = title;
+      (document.getElementById('edit-description') as HTMLInputElement).value = description;
+      (document.getElementById('edit-expires') as HTMLInputElement).value = formattedDate;
       (document.getElementById('edit-is-active') as HTMLInputElement).checked = isActive;
 
       editModal.showModal();
@@ -289,8 +313,14 @@ import '../styles/global.css';
   editForm?.addEventListener('submit', async (e: Event) => {
     e.preventDefault();
     if (!currentActionId) return;
-    const originalUrl = (document.getElementById('edit-original-url') as HTMLInputElement).value;
+    
+    const title = (document.getElementById('edit-title') as HTMLInputElement).value;
+    const description = (document.getElementById('edit-description') as HTMLInputElement).value;
+    const expiresInput = (document.getElementById('edit-expires') as HTMLInputElement).value;
     const isActive = (document.getElementById('edit-is-active') as HTMLInputElement).checked;
+
+    const expiresAt = expiresInput ? new Date(expiresInput).toISOString() : null;
+
     try {
       const response = await fetch(`${API_URL}/links/${currentActionId}`, {
         method: 'PATCH',
@@ -298,7 +328,12 @@ import '../styles/global.css';
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ originalUrl, isActive })
+        body: JSON.stringify({ 
+          title: title || undefined, 
+          description: description || undefined, 
+          isActive, 
+          expiresAt 
+        })
       });
       if (!response.ok) throw new Error('Failed to update link');
       showToast('Link updated successfully!', 'success');
