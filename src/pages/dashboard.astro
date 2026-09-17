@@ -141,7 +141,17 @@ import '../styles/global.css';
 
   // 2. Auth Guard & Variables
   const API_URL = import.meta.env.PUBLIC_API_URL;
+
+  // grabbing accessToken from browser Localstorage
   const token = localStorage.getItem('accessToken');
+    // 3. Kickoff Logic
+  if (!token) {
+    // If there is no token in localStorage, kick them out to the login page immediately
+    window.location.href = '/login';
+  } else {
+    // If they have a token, fetch their links
+    fetchUserLinks();
+  }
 
   // DOM Elements
   const loadingState = document.getElementById('loading-state') as HTMLDivElement;
@@ -161,14 +171,7 @@ import '../styles/global.css';
     expiresAt?: string;
   }
 
-  // 3. Kickoff Logic
-  if (!token) {
-    // If there is no token in localStorage, kick them out to the login page immediately
-    window.location.href = '/login';
-  } else {
-    // If they have a token, fetch their links
-    fetchUserLinks();
-  }
+
 
   // 4. Fetch Links from Backend
   async function fetchUserLinks(): Promise<void> {
