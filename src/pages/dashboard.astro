@@ -221,22 +221,27 @@ import '../styles/global.css';
       const shortUrl = `${API_URL}/${link.shortCode}`;
       
       row.innerHTML = `
+
         <td>
           <a href="${shortUrl}" target="_blank" class="link link-primary font-medium text-lg">
             /${link.shortCode}
           </a>
         </td>
+
         <td class="max-w-[200px] sm:max-w-xs truncate text-base-content/80" title="${link.originalUrl}">
           ${link.originalUrl}
         </td>
+
         <td>
           <div class="badge ${link.isActive ? 'badge-success' : 'badge-error'} badge-sm text-white">
             ${link.isActive ? 'Active' : 'Inactive'}
           </div>
         </td>
+
         <td class="text-sm text-base-content/70">
           ${new Date(link.createdAt).toLocaleDateString()}
         </td>
+
         <td>
           <div class="flex gap-2">
             <button class="btn btn-sm btn-secondary copy-btn" data-url="${shortUrl}">Copy</button>
@@ -244,6 +249,7 @@ import '../styles/global.css';
             <button class="btn btn-sm btn-error delete-btn" data-id="${link.id}">Delete</button>
           </div>
         </td>
+        
       `;
       tableBody.appendChild(row);
     });
