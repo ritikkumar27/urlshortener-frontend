@@ -195,7 +195,7 @@ import '../styles/global.css';
 
 			const shortCode = data.shortCode;
 			if(shortenedUrlInput){
-				shortenedUrlInput.value = `${API_URL}/${shortCode}`;
+				shortenedUrlInput.value = data.shortUrl || `${window.location.origin}/${shortCode}`;
 			}
 
 			form.reset();
