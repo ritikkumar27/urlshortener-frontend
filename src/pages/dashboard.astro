@@ -169,6 +169,7 @@ import '../styles/global.css';
     title?: string;
     description?: string;
     expiresAt?: string;
+    shortUrl?: string;
   }
 
 
@@ -218,7 +219,7 @@ import '../styles/global.css';
 
     links.forEach(link => {
       const row = document.createElement('tr');
-      const shortUrl = `${API_URL}/${link.shortCode}`;
+      const shortUrl = link.shortUrl || `/${link.shortCode}`;
       
       row.innerHTML = `
 
