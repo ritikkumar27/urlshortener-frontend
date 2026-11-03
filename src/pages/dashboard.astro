@@ -197,7 +197,8 @@ import '../styles/global.css';
         throw new Error('Failed to fetch links');
       }
 
-      const links: Link[] = await response.json();
+      const result = await response.json();
+      const links: Link[] = Array.isArray(result) ? result : result.data;
       renderLinks(links);
     } catch (err) {
       console.error(err);
